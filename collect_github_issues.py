@@ -25,7 +25,7 @@ def search_github(full_repo_name):
     issue_summary_file = f'{org_name}-{repo_name}'
 
     issues_object = None
-    g = Github("ACCESS_TOKE_GOES_HERE")
+    g = Github(os.getenv('GITHUB_ACCESS_TOKEN'))
     res = g.get_organization(org_name)
 
     for repo in res.get_repos():
