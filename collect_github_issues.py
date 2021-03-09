@@ -27,10 +27,6 @@ def search_github(full_repo_name):
     issues_object = None
     client = Github('78cf2efd43bb785275007bf44c169a00e2d35727')
 
-    # ACCESS_USERNAME = 'veeranaidu2'
-    # ACCESS_PWD = "Bramha@574"
-    # client = Github(ACCESS_USERNAME, ACCESS_PWD)
-
     res = client.get_organization(org_name)
 
     for repo in res.get_repos():
