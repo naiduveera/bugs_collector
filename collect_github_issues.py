@@ -6,7 +6,7 @@ import os
 import requests
 
 def get_buggy_files(repo, pull_request):
-    requests.get("https://api.github.com/user", auth=("78cf2efd43bb785275007bf44c169a00e2d35727", "x-oauth-basic"))
+    requests.get("https://api.github.com/user", auth=("", "x-oauth-basic"))
     files_list = []
     pull_request_id = int(pull_request.html_url.split("/")[-1])
     github_files = (repo.get_pull(pull_request_id)).get_files()
