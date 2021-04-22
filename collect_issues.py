@@ -1,8 +1,22 @@
+import requests
 from github import Github
 import csv
 import sys
 import getopt
 import os
+import requests
+
+
+def get_buggy_files(repo, pull_request):
+    requests.get("https://api.github.com/user", auth=("", "x-oauth-basic"))
+    files_list = []
+    pull_request_id = int(pull_request.html_url.split("/")[-1])
+    github_files = (repo.get_pull(pull_request_id)).get_files()
+
+    for github_file in github_files:
+        files_list.append(github_file.filename)
+
+    return files_list
 
 
 def search_github(full_repo_name):
@@ -11,9 +25,8 @@ def search_github(full_repo_name):
     repo_object = None
 
     issue_summary_file = f'{org_name}-{repo_name}'
-
     issues_object = None
-    g = Github("bd71ca67d51f9fa6f0280c008b480b76e3bb1e81")
+    g = Github(os.environ['GITHUB_TOKEN'])
     res = g.get_organization(org_name)
 
     for repo in res.get_repos():
@@ -27,13 +40,20 @@ def search_github(full_repo_name):
 
     with open(f'{issue_summary_file}.csv', mode='a', newline='', encoding='utf-8') as csv_file:
         issue_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        issue_writer.writerow(["ISSUE_ID", "ISSUE_TITLE", "ISSUE_LABELS", "ISSUE_STATE", "ISSUE_CREATED_AT", "ISSUE_URL"])
+        issue_writer.writerow(["ISSUE_ID", "ISSUE_TITLE", "FILE_NAME", "ISSUE_LABELS", "ISSUE_STATE", "ISSUE_CREATED_AT", "ISSUE_URL"])
+        counter = 0
         for issue in issues_object:
             for label in issue.labels:
-                if label.name.lower() == "bug":
-                    if issue.labels:
-                        print(f"Writing issue {issue.id}")
-                        issue_writer.writerow([issue.id, issue.title, label.name.lower(), issue.state, issue.created_at, issue.html_url])
+                #if label.name.lower() == "bug":
+                counter = counter + 1
+                if issue.labels:
+                    if issue.pull_request:
+                        buggy_files = get_buggy_files(repo_object, issue.pull_request)
+                        for file_name in buggy_files:
+                            print(f"Writing issue {issue.id} - {file_name}")
+                            issue_writer.writerow([issue.id, issue.title, file_name, label.name.lower(), issue.state,issue.created_at, issue.html_url])
+
+        print(f"Total Number Of Bugs : {counter}")
 
 
 def evaluate_args():
